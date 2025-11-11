@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from config import Config, DevelopmentConfig, ProductionConfig
 from flask_cors import CORS
 from models import db, initialize_database
@@ -32,10 +32,13 @@ jwt.init_app(app)
 with app.app_context():
     initialize_database()
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True)
-
 #Hello world
 @app.route("/")
 def hello():
     return "Hello, World!"
+
+
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=5000, debug=True)
+
+

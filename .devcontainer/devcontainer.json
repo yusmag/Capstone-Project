@@ -1,0 +1,19 @@
+{
+  "name": "Repo Dev (Backend + DBs)",
+  "dockerComposeFile": ["docker-compose.yml"],
+  "service": "backend",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+  "overrideCommand": true,
+  "postStartCommand": "sh -lc \"python -m gunicorn -w 2 -b 0.0.0.0:8000 BACKEND.app:app --reload >/tmp/gunicorn.log 2>&1 &\"",
+
+  "forwardPorts": [8000, 8080, 3307, 5433],
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python", "ms-python.vscode-pylance"]
+    }
+  },
+  "remoteEnv": {
+    "PYTHONDONTWRITEBYTECODE": "1"
+  }
+}
