@@ -1,5 +1,15 @@
+# env & caches
 .env
 **/.env
 **/__pycache__/
 **/*.pyc
 .vscode/
+.idea/
+
+# docker noise
+**/*.log
+docker-compose.override.yml
+
+# mac/win
+.DS_Store
+Thumbs.db
