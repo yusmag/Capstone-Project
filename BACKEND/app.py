@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, jsonify, render_template
 from config import Config, DevelopmentConfig, ProductionConfig
 from flask_cors import CORS
-from models import db, initialize_database
+from models import db, initialize_database, create_user, get_user_by_id
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 
 ## Below library not yet track
@@ -37,6 +37,32 @@ with app.app_context():
 def hello():
     return "Hello, World!"
 
+#REGISTER OR CREATE AN USER
+@app.route('/register', methods=['POST'])
+def register_user():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')  
+    phone_number = data.get('phone_number')
+    
+    try:
+        user_id = create_user(email, phone_number, password)
+        return jsonify({"message": "User created successfully", "user_id": user_id}), 201
+    
+    except Exception as e:
+        # Handle errors and conflicts, such as a duplicate username
+        return jsonify({"error": "User creation failed", "details": str(e)}), 400
+    
+
+@app.route('/user/<int:user_id>', methods=['GET'])
+def user_by_id(user_id):
+    user = get_user_by_id(user_id)
+    if user:
+        return jsonify(user)
+    else:
+        return jsonify({"error": "User not found"}), 404
+ 
+    
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
