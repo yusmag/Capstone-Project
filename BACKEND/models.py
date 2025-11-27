@@ -19,12 +19,34 @@ def create_user_tables():
     with db.engine.begin() as connection:
         connection.execute(user_table_sql)
 
+def create_product_tables():
+    # catalogue tables
+    product_table_sql = text("""
+        CREATE TABLE IF NOT EXISTS products (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            category ENUM('Boards','Apparel','Gear') NOT NULL,
+            product_name VARCHAR(120) NOT NULL,
+            brand VARCHAR(120) NOT NULL,
+            size VARCHAR(120) NOT NULL,
+            colour VARCHAR(120),
+            traction_colour VARCHAR(120),
+            shape VARCHAR(120),
+            quantity INT NOT NULL DEFAULT 0,
+            price DECIMAL(6,2) NOT NULL DEFAULT 0.00,
+            image VARCHAR(256),
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            update_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )ENGINE=InnoDB;
+    """)
+    with db.engine.begin() as connection:
+        connection.execute(product_table_sql)
 
 def initialize_database():
     """Create user tables if they don't exist before the first request."""
     create_user_tables()
+    create_product_tables()
 
-    ### CRUD USER ###
+### CRUD USER ###
 #CREATE USER
 def create_user(email, phone_number, password):
     try:
@@ -48,6 +70,7 @@ def create_user(email, phone_number, password):
         db.session.rollback()
         raise e   
 
+#GET USER
 def get_user_by_id(user_id):
     try:
         sql = text("SELECT id, email, phone_number, password FROM users WHERE id = :user_id;")
@@ -59,6 +82,43 @@ def get_user_by_id(user_id):
             # Convert the result into a dictionary if not None
             user_details = user._asdict()
             return user_details
+        else:
+            return None
+    except Exception as e:
+        # Rollback the transaction in case of error
+        db.session.rollback()
+        raise e
+
+
+### CRUD PRODUCT ###
+# Create product
+def create_product(category, product_name, brand, size, colour, traction_colour, shape, quantity, price, image):
+    try: 
+        product_table_sql = text("""
+        INSERT INTO products (category, product_name, brand, size, colour, traction_colour, shape, quantity, price, image) VALUES (:category, :product_name, :brand, :size, :colour, :traction_colour, :shape, :quantity, :price, :image);
+        """)
+        db.session.execute(product_table_sql, {'category': category, 'product_name' : product_name, 'brand' : brand, 'size' : size, 'colour' : colour, 'traction_colour' : traction_colour, 'shape' : shape, 'quantity' : quantity, 'price' : price, 'image': image})
+        product_id = db.session.execute(text('SELECT LAST_INSERT_ID();')).fetchone()[0] 
+
+        db.session.commit()
+        return product_id
+    
+    except Exception as e:
+        # Rollback the transaction in case of error
+        db.session.rollback()
+        raise e   
+
+def get_product_by_id(product_id):
+    try:
+        sql = text("SELECT id, category, product_name, brand, size, colour, shape, quantity, price, image FROM products WHERE id = :product_id;")
+        result = db.session.execute(sql, {'product_id': product_id})
+        products = result.fetchone()
+
+        # No need to commit() as no changes are being written to the database
+        if products:
+            # Convert the result into a dictionary if not None
+            product_details = products._asdict()
+            return product_details
         else:
             return None
     except Exception as e:
