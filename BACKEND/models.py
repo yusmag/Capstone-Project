@@ -35,7 +35,7 @@ def create_product_tables():
             price DECIMAL(6,2) NOT NULL DEFAULT 0.00,
             image VARCHAR(256),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            update_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )ENGINE=InnoDB;
     """)
     with db.engine.begin() as connection:
@@ -92,12 +92,12 @@ def get_user_by_id(user_id):
 
 ### CRUD PRODUCT ###
 # Create product
-def create_product(category, product_name, brand, size, colour, traction_colour, shape, quantity, price, image):
+def create_product(category, product_name, brand, size, colour, traction_colour, shape, quantity, price, image_path):
     try: 
         product_table_sql = text("""
         INSERT INTO products (category, product_name, brand, size, colour, traction_colour, shape, quantity, price, image) VALUES (:category, :product_name, :brand, :size, :colour, :traction_colour, :shape, :quantity, :price, :image);
         """)
-        db.session.execute(product_table_sql, {'category': category, 'product_name' : product_name, 'brand' : brand, 'size' : size, 'colour' : colour, 'traction_colour' : traction_colour, 'shape' : shape, 'quantity' : quantity, 'price' : price, 'image': image})
+        db.session.execute(product_table_sql, {'category': category, 'product_name' : product_name, 'brand' : brand, 'size' : size, 'colour' : colour, 'traction_colour' : traction_colour, 'shape' : shape, 'quantity' : quantity, 'price' : price, 'image': image_path})
         product_id = db.session.execute(text('SELECT LAST_INSERT_ID();')).fetchone()[0] 
 
         db.session.commit()
