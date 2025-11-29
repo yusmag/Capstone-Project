@@ -1,13 +1,14 @@
 import os
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from config import Config, DevelopmentConfig, ProductionConfig
 from flask_cors import CORS
 from models import db, initialize_database, create_user, get_user_by_id, create_product, get_product_by_id
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
+from decimal import Decimal
 
 ## Below library not yet track
-from sqlalchemy import create_engine, Integer, String, TIMESTAMP, func, select
+from sqlalchemy import create_engine, Integer, String, TIMESTAMP, func, select, text
 from sqlalchemy.orm import sessionmaker, declarative_base, Mapped, mapped_column
 from sqlalchemy.exc import IntegrityError
 from email_validator import validate_email, EmailNotValidError
@@ -25,15 +26,25 @@ app.config['UPLOAD_FOLDER'] = app.config.get('UPLOAD_FOLDER', 'static/images')
 # ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 # Upload folder
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+#os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Catalogue folder
-ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
+# Product Catalogue folder
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
-#CATEGORIES = {"Apparel", "Boards", "Gears"}
+CATEGORIES = {"Apparel", "Boards", "Gears"}
+
+BASE_DIR = os.path.dirname(__file__)
+ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
+os.makedirs(ASSETS_DIR, exist_ok=True)
+for cat in CATEGORIES:
+    os.makedirs(os.path.join(ASSETS_DIR, cat), exist_ok=True)
+
 
 def _ext_ok(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.get("/assets/<path:filename>")
+def server_asset(filename):
+    return send_from_directory(ASSETS_DIR, filename, as_attachment=False)
 
 
 db.init_app(app)
@@ -85,10 +96,14 @@ def register_product():
     traction_colour = (data.get('traction_colour') or "").strip()
     shape = (data.get('shape') or "").strip()
     quantity = (data.get('quantity') or "").strip()
-    price = (data.get('price') or "").strip()
+    price = Decimal(str(data.get("price") or "0.00"))
     
+    if category not in CATEGORIES:
+        return{"error": f"Invalid category. Use one of {sorted(CATEGORIES)}"}, 422
+    
+    # file upload handling
     image_path = None
-    file = request.files.get("image") 
+    file = request.files.get('image') 
     if file and file.filename: 
         if not _ext_ok(file.filename):
             return jsonify({"error": "Unsupported image type"}), 415
@@ -98,14 +113,20 @@ def register_product():
         full_path = os.path.join(save_dir, fname)
         file.save(full_path)
         image_path = f"/assets/{category}/{fname}"
-    else:
-        # If client passed a URL/path in text field 'image'
-        img_text = (data.get("image") or "").strip()
-        if img_text:
-            image_path = img_text  # e.g., "/assets/Boards/board1.jpg"
+    if not image_path and data.get("image"):
+            image_path = data["image"].strip()
+    
+    #app.logger.info("create product image_path=%s", image_path)
 
     try:
         product_id = create_product(category, product_name, brand, size, colour, traction_colour, shape, quantity, price, image_path)
+        # row = db.session.execute(text("""
+        #     SELECT id, category, product_name, brand, size, colour, traction_colour,
+        #            shape, quantity, price, image, created_at, update_at
+        #     FROM products WHERE id = :id
+        # """), {"id": product_id}).mappings().one()
+        # product = dict(row)
+        # product["price"] = str(product["price"]) if product["price"] is not None else None
         return jsonify({"message": "Product created successfully", "product_id": product_id}), 201
     
     except Exception as e:
