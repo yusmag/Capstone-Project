@@ -22,7 +22,7 @@ app.config.from_object(f'config.{config_class}')
 jwt = JWTManager()
 
 # UPLOAD_FOLDER = 'static/images'
-app.config['UPLOAD_FOLDER'] = app.config.get('UPLOAD_FOLDER', 'static/images')
+# app.config['UPLOAD_FOLDER'] = app.config.get('UPLOAD_FOLDER', 'static/images')
 # ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 # Upload folder
@@ -45,6 +45,9 @@ def _ext_ok(filename: str) -> bool:
 @app.get("/assets/<path:filename>")
 def server_asset(filename):
     return send_from_directory(ASSETS_DIR, filename, as_attachment=False)
+
+#file handling
+# INSERT FILE HANDLING FUNCTION HERE
 
 
 db.init_app(app)
@@ -96,7 +99,7 @@ def register_product():
     traction_colour = (data.get('traction_colour') or "").strip()
     shape = (data.get('shape') or "").strip()
     quantity = (data.get('quantity') or "").strip()
-    price = Decimal(str(data.get("price") or "0.00"))
+    price = Decimal(data.get("price") or "0.00")
     
     if category not in CATEGORIES:
         return{"error": f"Invalid category. Use one of {sorted(CATEGORIES)}"}, 422
@@ -116,17 +119,11 @@ def register_product():
     if not image_path and data.get("image"):
             image_path = data["image"].strip()
     
+    #debugging purpose
     #app.logger.info("create product image_path=%s", image_path)
 
     try:
         product_id = create_product(category, product_name, brand, size, colour, traction_colour, shape, quantity, price, image_path)
-        # row = db.session.execute(text("""
-        #     SELECT id, category, product_name, brand, size, colour, traction_colour,
-        #            shape, quantity, price, image, created_at, update_at
-        #     FROM products WHERE id = :id
-        # """), {"id": product_id}).mappings().one()
-        # product = dict(row)
-        # product["price"] = str(product["price"]) if product["price"] is not None else None
         return jsonify({"message": "Product created successfully", "product_id": product_id}), 201
     
     except Exception as e:
@@ -141,6 +138,127 @@ def get_product(product_id):
         return jsonify(product)
     else:
         return jsonify({"error": "Product not found"}), 404
+
+
+#HELPER FUNCTION TO UPDATE PRODUCT DETAILS
+UPDATATABLE_FIELDS = {
+    "category", "product_name", "brand", "size", "colour", "traction_colour", "shape", "quantity", "price", "image"
+}
+
+
+def _to_int(v):
+    try: 
+        return int(v)
+    except Exception:
+        return None
+    
+def _to_dec(v):
+    try:
+        return Decimal(v)
+    except Exception:
+        return None
+    
+def _cleaned_updates_from_form(form) -> dict[str, any]:
+    """"Return only non-empty fields(no '', no whitespace)"""
+    updates: dict[str, any] = {}
+    for k, v in form.items():
+        if v is None:
+            continue
+        v2 = v.strip()
+        if v2 == "":
+            continue
+        updates[k] = v2
+    return updates
+
+#UPDATE PRODUCT DETAILS
+@app.route('/products/<int:product_id>', methods=['PUT'])
+def update_product(product_id: int):
+    #JSON or FORM data
+    data = request.get_json(silent=True)
+    if data is None:
+        data = _cleaned_updates_from_form(request.form) # run function to clean form data
+
+    candidate = {
+        "category": data.get("category") or None,
+        "product_name": data.get("product_name") or None,
+        "brand": data.get("brand") or None,
+        "size": data.get("size") or None,
+        "colour": data.get("colour") or None,
+        "traction_colour": data.get("traction_colour") or None,
+        "shape": data.get("shape") or None,
+        "quantity": _to_int(data.get("quantity")) if "quantity" in data else None,
+        "price": _to_dec(data.get("price")) if "price" in data else None,
+        "image": (data.get("image") or None) if "image" in data else None,
+    }
+    #drop any keys if no value
+    fields = {k: v for k, v in candidate.items() if v is not None and k in UPDATATABLE_FIELDS}
+
+    #verify category if any
+    if "category" in fields and fields["category"] not in CATEGORIES:
+        return jsonify({"error": f"Invalid category. Use one of {sorted(CATEGORIES)}"}), 422
+    
+    # file upload handling
+    image_path = None
+    file = request.files.get('image') 
+    if file and file.filename: 
+        if not _ext_ok(file.filename):
+            return jsonify({"error": "Unsupported image type"}), 415
+        target_category = fields.get("category")
+        if not target_category:
+            row = db.session.execute(
+                text("SELECT category FROM products WHERE id=:id"),
+                {"id":product_id}
+            ).first()
+            if not row:
+                return jsonify({"error": "Product not found"}), 404
+            target_category = row[0]
+
+        os.makedirs(os.path.join(ASSETS_DIR, target_category), exist_ok=True)
+        fname = secure_filename(file.filename)
+        file.save(os.path.join(ASSETS_DIR, target_category, fname))
+        fields["image"] = f"/assets/{target_category}/{fname}"
+
+        # IF NOTHING TO UPDATE
+        if not fields:
+            current = db.session.execute(text("""
+                SELECT id, category, product_name, brand, size, colour, traction_colour, shape, quantity, price, image, created_at, update_at
+                FROM products WHERE id=:id
+                """), {"id":product_id}).mappings().first()
+            if not current:
+                return jsonify({"error": "Product not found"}), 404
+            d = dict(current)
+            if d.get("price") is not None: d["price"] = str(d["price"])
+            return jsonify({"message": "No changes", "product":d}), 200
+    set_clause = ", ".join(f"{col} = :{col}" for col in fields.keys())
+    sql = text(f"""
+        UPDATE products
+        SET {set_clause}, update_at=CURRENT_TIMESTAMP
+        WHERE id = :id
+    """)
+    params = {"id": product_id, **fields}
+
+    try:
+        res = db.session.execute(sql, params)
+        if res.rowcount == 0:
+            db.session.rollback()
+            return jsonify({"error": "Product not found"}), 404
+
+        row = db.session.execute(text("""
+            SELECT id, category, product_name, brand, size, colour, traction_colour,
+                   shape, quantity, price, image, created_at, update_at
+            FROM products WHERE id=:id
+        """), {"id": product_id}).mappings().one()
+
+        db.session.commit()
+
+        out = dict(row)
+        if out.get("price") is not None:
+            out["price"] = str(out["price"])  # JSON-safe for DECIMAL
+        return jsonify({"message": "Product updated", "product": out}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Update failed", "details": str(e)}), 400
 
 
 if __name__ == "__main__":
