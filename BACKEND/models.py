@@ -110,7 +110,7 @@ def create_product(category, product_name, brand, size, colour, traction_colour,
 
 def get_product_by_id(product_id):
     try:
-        sql = text("SELECT id, category, product_name, brand, size, colour, shape, quantity, price, image FROM products WHERE id = :product_id;")
+        sql = text("SELECT id, category, product_name, brand, size, colour, traction_colour, shape, quantity, price, image FROM products WHERE id = :product_id;")
         result = db.session.execute(sql, {'product_id': product_id})
         products = result.fetchone()
 
@@ -121,6 +121,25 @@ def get_product_by_id(product_id):
             return product_details
         else:
             return None
+    except Exception as e:
+        # Rollback the transaction in case of error
+        db.session.rollback()
+        raise e
+    
+def update_product_details(product_id, update_fields):
+    try:
+        # Dynamically build the SET part of the SQL query
+        set_clause = ", ".join([f"{field} = :{field}" for field in update_fields.keys()])
+        update_sql = text(f"""
+        UPDATE products SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = :product_id;
+        """)
+        
+        # Add product_id to the parameters
+        params = update_fields.copy()
+        params['product_id'] = product_id
+        
+        db.session.execute(update_sql, params)
+        db.session.commit()
     except Exception as e:
         # Rollback the transaction in case of error
         db.session.rollback()
