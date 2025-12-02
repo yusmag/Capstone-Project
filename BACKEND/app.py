@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from config import Config, DevelopmentConfig, ProductionConfig
 from flask_cors import CORS
-from models import db, initialize_database, create_user, get_user_by_id, create_product, get_product_by_id
+from models import db, initialize_database, create_user, get_user_by_id, update_user_details, create_product, get_product_by_id, update_product_details
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from decimal import Decimal
@@ -64,13 +64,22 @@ def hello():
 #REGISTER OR CREATE AN USER
 @app.route('/register', methods=['POST'])
 def register_user():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')  
-    phone_number = data.get('phone_number')
+    data = request.get_json(silent=True) or request.form.to_dict()
+    first_name = (data.get('first_name') or "").strip()
+    last_name = (data.get('last_name') or "").strip()
+    email = data.get('email') or "".strip()
+    password = data.get('password') or "".strip()
+    phone_number = data.get('phone_number') or "".strip()
+    address = data.get('address') or "".strip()
+    city = data.get('city') or "".strip()
+    postal_code = data.get('postal_code') or "".strip()
     
+     # Basic validation for required fields
+    if not first_name or not last_name or not email or not password:
+        return jsonify({"error": "First name, last name, email, and password are required"}), 400       
+
     try:
-        user_id = create_user(email, phone_number, password)
+        user_id = create_user(first_name, last_name, email, password, phone_number, address, city, postal_code)
         return jsonify({"message": "User created successfully", "user_id": user_id}), 201
     
     except Exception as e:
@@ -85,6 +94,29 @@ def user_by_id(user_id):
         return jsonify(user)
     else:
         return jsonify({"error": "User not found"}), 404
+    
+#UPDATE USER DETAILS
+@app.route('/user/<int:user_id>', methods=['PUT'])
+def update_user(user_id):  
+    data = request.get_json()
+    update_fields = {}
+    allowed_fields = {"first_name", "last_name", "email", "password", "phone_number", "address", "city", "postal_code"}
+    
+    for field in allowed_fields:
+        if field in data:
+            update_fields[field] = data[field].strip() if isinstance(data[field], str) else data[field]
+    
+    if not update_fields:
+        return jsonify({"error": "No valid fields to update"}), 400
+    
+    try:
+        updated_user = update_user_details(user_id, update_fields)
+        if updated_user:
+            return jsonify({"message": "User updated successfully", "user": updated_user}), 200
+        else:
+            return jsonify({"error": "User not found"}), 404
+    except Exception as e:
+        return jsonify({"error": "User update failed", "details": str(e)}), 400
  
 
 #REGISTER A PRODUCT
@@ -221,7 +253,7 @@ def update_product(product_id: int):
         # IF NOTHING TO UPDATE
         if not fields:
             current = db.session.execute(text("""
-                SELECT id, category, product_name, brand, size, colour, traction_colour, shape, quantity, price, image, created_at, update_at
+                SELECT id, category, product_name, brand, size, colour, traction_colour, shape, quantity, price, image, created_at, updated_at
                 FROM products WHERE id=:id
                 """), {"id":product_id}).mappings().first()
             if not current:
@@ -232,7 +264,7 @@ def update_product(product_id: int):
     set_clause = ", ".join(f"{col} = :{col}" for col in fields.keys())
     sql = text(f"""
         UPDATE products
-        SET {set_clause}, update_at=CURRENT_TIMESTAMP
+        SET {set_clause}, updated_at=CURRENT_TIMESTAMP
         WHERE id = :id
     """)
     params = {"id": product_id, **fields}
@@ -245,7 +277,7 @@ def update_product(product_id: int):
 
         row = db.session.execute(text("""
             SELECT id, category, product_name, brand, size, colour, traction_colour,
-                   shape, quantity, price, image, created_at, update_at
+                   shape, quantity, price, image, created_at, updated_at
             FROM products WHERE id=:id
         """), {"id": product_id}).mappings().one()
 

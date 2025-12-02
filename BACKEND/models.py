@@ -9,9 +9,15 @@ def create_user_tables():
     user_table_sql = text("""
         CREATE TABLE IF NOT EXISTS users (
             id INT AUTO_INCREMENT PRIMARY KEY,
+            first_name VARCHAR(120) DEFAULT NULL,
+            last_name VARCHAR(120) DEFAULT NULL,
             email VARCHAR(120) UNIQUE NOT NULL,
-            phone_number VARCHAR(20) DEFAULT NULL,
             password VARCHAR(64) NOT NULL, 
+            phone_number VARCHAR(20) DEFAULT NULL,
+            address VARCHAR(256) DEFAULT NULL,
+            city VARCHAR(120) DEFAULT NULL,
+            postal_code VARCHAR(20) DEFAULT NULL,
+            is_admin TINYINT(1) DEFAULT 0,
             modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )ENGINE=InnoDB;
@@ -48,16 +54,16 @@ def initialize_database():
 
 ### CRUD USER ###
 #CREATE USER
-def create_user(email, phone_number, password):
+def create_user(first_name, last_name, email, password, phone_number, address, city, postal_code):
     try:
         # Hashed the password
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         # Insert into users table
         user_sql = text("""
-        INSERT INTO users (email, phone_number, password) VALUES (:email, :phone_number, :password);
+        INSERT INTO users (first_name, last_name, email, password, phone_number, address, city, postal_code) VALUES (:first_name, :last_name, :email, :password, :phone_number, :address, :city, :postal_code);
         """)
 
-        db.session.execute(user_sql, {'email': email, 'phone_number': phone_number, 'password': hashed_password})
+        db.session.execute(user_sql, {'first_name': first_name,'last_name': last_name,'' 'email': email, 'password': hashed_password, 'phone_number': phone_number, 'address': address, 'city': city, 'postal_code': postal_code})
         
         # Fetch the last inserted user_id
         user_id = db.session.execute(text('SELECT LAST_INSERT_ID();')).fetchone()[0] 
@@ -73,7 +79,7 @@ def create_user(email, phone_number, password):
 #GET USER
 def get_user_by_id(user_id):
     try:
-        sql = text("SELECT id, email, phone_number, password FROM users WHERE id = :user_id;")
+        sql = text("SELECT id, first_name, last_name, email, password, phone_number, address, city, postal_code FROM users WHERE id = :user_id;")
         result = db.session.execute(sql, {'user_id': user_id})
         user = result.fetchone()
 
@@ -89,6 +95,25 @@ def get_user_by_id(user_id):
         db.session.rollback()
         raise e
 
+#UPDATE USER
+def update_user_details(user_id, update_fields):
+    try:
+        # Dynamically build the SET part of the SQL query
+        set_clause = ", ".join([f"{field} = :{field}" for field in update_fields.keys()])
+        update_sql = text(f"""
+        UPDATE users SET {set_clause}, modified_at = CURRENT_TIMESTAMP WHERE id = :user_id;
+        """)
+        
+        # Add user_id to the parameters
+        params = update_fields.copy()
+        params['user_id'] = user_id
+        
+        db.session.execute(update_sql, params)
+        db.session.commit()
+    except Exception as e:
+        # Rollback the transaction in case of error
+        db.session.rollback()
+        raise e
 
 ### CRUD PRODUCT ###
 # Create product
