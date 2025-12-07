@@ -2,6 +2,12 @@ from extensions import db, bcrypt
 from sqlalchemy import text, exc
 from flask_jwt_extended import create_access_token
 
+# HELPER
+UPDATABLE_FIELDS = {
+    "category", "product_name", "brand", "size", "colour", "traction_colour", "shape", "quantity", "description", "price", "image"
+}
+
+
 
 # SQL table creation
 def create_user_tables():
@@ -38,6 +44,7 @@ def create_product_tables():
             traction_colour VARCHAR(120),
             shape VARCHAR(120),
             quantity INT NOT NULL DEFAULT 0,
+            description VARCHAR(512) DEFAULT NULL,
             price DECIMAL(6,2) NOT NULL DEFAULT 0.00,
             image VARCHAR(256),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -117,12 +124,12 @@ def update_user_details(user_id, update_fields):
 
 ### CRUD PRODUCT ###
 # Create product
-def create_product(category, product_name, brand, size, colour, traction_colour, shape, quantity, price, image_path):
+def create_product(category, product_name, brand, size, colour, traction_colour, shape, quantity, description, price, image_path):
     try: 
         product_table_sql = text("""
-        INSERT INTO products (category, product_name, brand, size, colour, traction_colour, shape, quantity, price, image) VALUES (:category, :product_name, :brand, :size, :colour, :traction_colour, :shape, :quantity, :price, :image);
+        INSERT INTO products (category, product_name, brand, size, colour, traction_colour, shape, quantity, description, price, image) VALUES (:category, :product_name, :brand, :size, :colour, :traction_colour, :shape, :quantity, :description, :price,  :image);
         """)
-        db.session.execute(product_table_sql, {'category': category, 'product_name' : product_name, 'brand' : brand, 'size' : size, 'colour' : colour, 'traction_colour' : traction_colour, 'shape' : shape, 'quantity' : quantity, 'price' : price, 'image': image_path})
+        db.session.execute(product_table_sql, {'category': category, 'product_name' : product_name, 'brand' : brand, 'size' : size, 'colour' : colour, 'traction_colour' : traction_colour, 'shape' : shape, 'quantity' : quantity, 'description': description, 'price' : price, 'image': image_path})
         product_id = db.session.execute(text('SELECT LAST_INSERT_ID();')).fetchone()[0] 
 
         db.session.commit()
@@ -135,7 +142,7 @@ def create_product(category, product_name, brand, size, colour, traction_colour,
 
 def get_product_by_id(product_id):
     try:
-        sql = text("SELECT id, category, product_name, brand, size, colour, traction_colour, shape, quantity, price, image FROM products WHERE id = :product_id;")
+        sql = text("SELECT id, category, product_name, brand, size, colour, traction_colour, shape, quantity, description, price, image FROM products WHERE id = :product_id;")
         result = db.session.execute(sql, {'product_id': product_id})
         products = result.fetchone()
 
@@ -150,22 +157,50 @@ def get_product_by_id(product_id):
         # Rollback the transaction in case of error
         db.session.rollback()
         raise e
-    
-def update_product_details(product_id, update_fields):
+
+
+def update_product_details(product_id: int, fields: dict[str, any]) -> dict[str, any] | None:
+    """
+    Partially update a product and return the updated row as a dict.
+    Only keys in UPDATABLE_FIELDS are applied.
+    """
+    # keep only allowed keys and non-None values
+    payload = {k: v for k, v in fields.items() if k in UPDATABLE_FIELDS and v is not None}
+    if not payload:
+        # nothing to update – return current row
+        row = db.session.execute(text("""
+            SELECT id, category, product_name, brand, size, colour, traction_colour,
+                   shape, quantity, description, price, image, created_at, updated_at
+            FROM products WHERE id=:id
+        """), {"id": product_id}).mappings().first()
+        return dict(row) if row else None
+
+    # build SET clause dynamically and bind parameters
+    set_parts = [f"{col} = :{col}" for col in payload.keys()]
+    sql = text(f"""
+        UPDATE products
+        SET {", ".join(set_parts)}, updated_at = CURRENT_TIMESTAMP
+        WHERE id = :id
+    """)
+
+    params = {"id": product_id, **payload}
     try:
-        # Dynamically build the SET part of the SQL query
-        set_clause = ", ".join([f"{field} = :{field}" for field in update_fields.keys()])
-        update_sql = text(f"""
-        UPDATE products SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = :product_id;
-        """)
-        
-        # Add product_id to the parameters
-        params = update_fields.copy()
-        params['product_id'] = product_id
-        
-        db.session.execute(update_sql, params)
+        res = db.session.execute(sql, params)
+        if res.rowcount == 0:
+            db.session.rollback()
+            return None
+
+        row = db.session.execute(text("""
+            SELECT id, category, product_name, brand, size, colour, traction_colour,
+                   shape, quantity, description, price, image, created_at, updated_at
+            FROM products WHERE id=:id
+        """), {"id": product_id}).mappings().one()
+
         db.session.commit()
-    except Exception as e:
-        # Rollback the transaction in case of error
+        d = dict(row)
+        if d.get("price") is not None:
+            d["price"] = str(d["price"])
+        return d
+    except Exception:
         db.session.rollback()
-        raise e
+        raise

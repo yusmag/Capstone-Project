@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Skimboard Catalogue</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <header>
+        <div class="header-inner">
+            <div class="brand">
+                <div class="brand-mark"></div>
+                <div>
+                    <div class="brand-name">This Side Up</div>
+                    <div style="font-size:0.8rem;color:#6b7280;">
+                        Custom Skimboards · Ride Your Line
+                    </div>
+                </div>
+            </div>
+
+            <div class="cart-pill">
+                <span>🛒</span> <span id="cart-count">0</span> items
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="catalog-header">
+            <h1>Skimboard Catalogue</h1>
+            <p>Select your board, choose your colourway, and add it to your cart.</p>
+        </section>
+
+        <section class="catalog-grid">
+            <!-- Product 1 -->
+            <article class="product-card" data-product-id="board-01">
+                <div class="image-wrapper">
+                    <img src="https://images.pexels.com/photos/965996/pexels-photo-965996.jpeg?auto=compress&cs=tinysrgb&w=800"
+                        alt="Puddle Jumper skimboard on the beach" />
+                    <button class="add-to-cart" type="button" aria-label="Add Puddle Jumper to cart">
+                        🛒
+                    </button>
+                </div>
+                <div class="card-body">
+                    <h2 class="product-title">Puddle Jumper 44"</h2>
+                    <div class="product-meta">
+                        <span class="product-price">$259.00</span>
+                        <span class="product-tagline">Beginner · Grom friendly</span>
+                    </div>
+                    <div class="colour-row">
+                        <span class="colour-label">Colours</span>
+                        <div class="colour-dots">
+                            <span class="colour-dot" style="background: linear-gradient(135deg,#f97316,#facc15);"
+                                title="Sunset Fade"></span>
+                            <span class="colour-dot" style="background: #0ea5e9;" title="Lagoon Blue"></span>
+                            <span class="colour-dot" style="background: #111827;" title="Midnight"></span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Product 2 -->
+            <article class="product-card" data-product-id="board-02">
+                <div class="image-wrapper">
+                    <img src="https://images.pexels.com/photos/1766783/pexels-photo-1766783.jpeg?auto=compress&cs=tinysrgb&w=800"
+                        alt="Streamline skimboard standing upright" />
+                    <button class="add-to-cart" type="button" aria-label="Add Streamline Pro to cart">
+                        🛒
+                    </button>
+                </div>
+                <div class="card-body">
+                    <h2 class="product-title">Streamline Pro 52"</h2>
+                    <div class="product-meta">
+                        <span class="product-price">$329.00</span>
+                        <span class="product-tagline">Intermediate · Fast line</span>
+                    </div>
+                    <div class="colour-row">
+                        <span class="colour-label">Colours</span>
+                        <div class="colour-dots">
+                            <span class="colour-dot" style="background: #22c55e;" title="Tropical Green"></span>
+                            <span class="colour-dot" style="background: #0f172a;" title="Deep Navy"></span>
+                            <span class="colour-dot" style="background: #f97316;" title="Orange Pop"></span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Product 3 -->
+            <article class="product-card" data-product-id="board-03">
+                <div class="image-wrapper">
+                    <img src="https://images.pexels.com/photos/1766784/pexels-photo-1766784.jpeg?auto=compress&cs=tinysrgb&w=800"
+                        alt="High performance pin tail skimboard" />
+                    <button class="add-to-cart" type="button" aria-label="Add Pin Tail Carbon to cart">
+                        🛒
+                    </button>
+                </div>
+                <div class="card-body">
+                    <h2 class="product-title">Carbon Pin Tail 54"</h2>
+                    <div class="product-meta">
+                        <span class="product-price">$399.00</span>
+                        <span class="product-tagline">Advanced · Carbon layup</span>
+                    </div>
+                    <div class="colour-row">
+                        <span class="colour-label">Colours</span>
+                        <div class="colour-dots">
+                            <span class="colour-dot" style="background: #020617;" title="Stealth Black"></span>
+                            <span class="colour-dot" style="background: #e5e7eb;" title="Ice Grey"></span>
+                            <span class="colour-dot" style="background: #facc15;" title="Neon Yellow"></span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Duplicate more product-card blocks as needed -->
+        </section>
+    </main>
+
+    <footer>
+        &copy; <span id="year"></span> This Side Up Skimboards. All rights reserved.
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
