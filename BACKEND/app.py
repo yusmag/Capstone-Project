@@ -178,6 +178,7 @@ UPDATABLE_FIELDS = {
     "category", "product_name", "brand", "size", "colour", "traction_colour", "shape", "quantity", "description", "price", "image"
 }
 
+ALLOWED_EXT = {"jpg", "jpeg", "png", "webp", "gif"}
 
 def _ext_ok(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXT

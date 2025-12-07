@@ -7,7 +7,7 @@ UPDATABLE_FIELDS = {
     "category", "product_name", "brand", "size", "colour", "traction_colour", "shape", "quantity", "description", "price", "image"
 }
 
-
+ALLOWED_EXT = {"jpg", "jpeg", "png", "webp", "gif"}
 
 # SQL table creation
 def create_user_tables():
@@ -44,7 +44,7 @@ def create_product_tables():
             traction_colour VARCHAR(120),
             shape VARCHAR(120),
             quantity INT NOT NULL DEFAULT 0,
-            description VARCHAR(512) DEFAULT NULL,
+            description TEXT,  -- long free-text description,
             price DECIMAL(6,2) NOT NULL DEFAULT 0.00,
             image VARCHAR(256),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
