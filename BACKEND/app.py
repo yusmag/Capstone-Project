@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from config import Config, DevelopmentConfig, ProductionConfig
 from flask_cors import CORS
-from models import db, initialize_database, create_user, get_user_by_id, update_user_details, create_product, get_product_by_id, update_product_details
+from models import db, initialize_database, create_user, get_user_by_id, update_user_details, create_product, get_product_by_id, update_product_details, list_products_service
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from decimal import Decimal, InvalidOperation
@@ -251,6 +251,21 @@ def update_product(product_id: int):
         return jsonify({"message": "Product updated", "product": updated}), 200
     except Exception as e:
         return jsonify({"error": "Update failed", "details": str(e)}), 400
+
+# List products
+@app.route("/products_list", methods=["GET"])
+def list_products():
+    # Read query params (all optional)
+    limit = request.args.get("limit", 20)
+    offset = request.args.get("offset", 0)
+    category = request.args.get("category") # Boards | Apparel | Gears
+    q = (request.args.get("q") or "").strip()   # search term
+    sort = request.args.get("sort", "updated_at")  # id|product_name|price|updated_at|created_at
+    dir_ = (request.args.get("dir", "desc")).lower()  # asc|desc
+
+    # Delegate to data/service layer
+    data = list_products_service(limit=limit, offset=offset, category=category, q=q or None, sort=sort, direction=dir_,)
+    return jsonify(data), 200
 
 
 if __name__ == "__main__":

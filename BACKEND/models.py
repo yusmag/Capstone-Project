@@ -140,6 +140,7 @@ def create_product(category, product_name, brand, size, colour, traction_colour,
         db.session.rollback()
         raise e   
 
+# Get product
 def get_product_by_id(product_id):
     try:
         sql = text("SELECT id, category, product_name, brand, size, colour, traction_colour, shape, quantity, description, price, image FROM products WHERE id = :product_id;")
@@ -158,7 +159,7 @@ def get_product_by_id(product_id):
         db.session.rollback()
         raise e
 
-
+# Update product
 def update_product_details(product_id: int, fields: dict[str, any]) -> dict[str, any] | None:
     """
     Partially update a product and return the updated row as a dict.
@@ -204,3 +205,59 @@ def update_product_details(product_id: int, fields: dict[str, any]) -> dict[str,
     except Exception:
         db.session.rollback()
         raise
+
+# Only allow these to be sorted to avoid SQL injection in ORDER BY
+_SORTABLE = {"id", "product_name", "price", "updated_at", "created_at"}
+
+def list_products_service(*, limit: int = 20, offset: int = 0, category: str | None = None, q: str | None = None, sort: str = "updated_at", direction: str = "desc",) -> dict[str, any]:
+    """Fetch paginated products with optional filters/search and safe sorting."""
+    # Clamp / sanitize
+    limit = max(1, min(int(limit), 100))
+    offset = max(0, int(offset))
+    sort = sort if sort in _SORTABLE else "updated_at"
+    direction = direction.lower()
+    direction = "asc" if direction == "asc" else "desc"
+
+    where: list[str] = []
+    params: dict[str, any] = {"limit": limit, "offset": offset}
+
+    if category:
+        where.append("category = :category")
+        params["category"] = category
+
+    if q:
+        where.append("(product_name LIKE :q OR brand LIKE :q OR colour LIKE :q)")
+        params["q"] = f"%{q.strip()}%"
+
+    where_sql = f"WHERE {' AND '.join(where)}" if where else ""
+
+    # Count
+    total = db.session.execute(
+        text(f"SELECT COUNT(*) FROM products {where_sql}"),
+        params
+    ).scalar()
+
+    # Rows
+    rows = db.session.execute(
+        text(f"""
+            SELECT id, category, product_name, brand, size, colour, traction_colour,
+                   shape, quantity, price, image, created_at, updated_at
+            FROM products
+            {where_sql}
+            ORDER BY {sort} {direction}
+            LIMIT :limit OFFSET :offset
+        """),
+        params
+    ).mappings().all()
+
+    items: list[dict[str, any]] = []
+    for r in rows:
+        d = dict(r)
+        if d.get("price") is not None:
+            d["price"] = str(d["price"])  # JSON-safe for DECIMAL
+        items.append(d)
+
+    return {
+        "meta": {"total": total, "limit": limit, "offset": offset, "sort": sort, "dir": direction},
+        "items": items,
+    }
