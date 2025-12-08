@@ -58,8 +58,13 @@ with app.app_context():
 
 #Hello world
 @app.route("/")
-def hello():
-    return "Hello, World!"
+def home():
+    return render_template("home.html", title="Home")
+
+@app.route("/user")
+def user():
+    return render_template("user.html", title="Welcome")
+
 
 #REGISTER OR CREATE AN USER
 @app.route('/register', methods=['POST'])

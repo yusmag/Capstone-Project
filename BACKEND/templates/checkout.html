@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | This Side Up</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Righteous&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="nav-left">
+      <div class="logo">
+        <img src="/static/logo/logo.jpg" class="logo-img">
+      </div>
+      <nav class="nav-links">
+        <a href="/shop">Shop</a>
+        <a href="/about">About</a>
+        <a href="/community">Community</a>
+      </nav>
+    </div>
+
+    <div class="nav-right">
+      <button class="icon-btn">🔍</button>
+      <button class="icon-btn" onclick="location.href='/cart'">🛒</button>
+      <button class="icon-btn" onclick="location.href='/user'">👤</button>
+    </div>
+  </header>
+
+
+  <!-- CHECKOUT PAGE -->
+  <main class="checkout-page">
+
+    <!-- LEFT: FORMS -->
+    <section class="checkout-left">
+
+      <h1 class="checkout-title">Checkout</h1>
+
+      <!-- SHIPPING DETAILS -->
+      <div class="checkout-section">
+        <h2 class="checkout-subtitle">Shipping Information</h2>
+
+        <label>Full Name</label>
+        <input type="text" placeholder="Enter your full name">
+
+        <label>Email</label>
+        <input type="email" placeholder="Enter your email">
+
+        <label>Phone Number</label>
+        <input type="text" placeholder="Enter your phone number">
+
+        <label>Address</label>
+        <input type="text" placeholder="Enter your full address">
+
+        <label>Postal Code</label>
+        <input type="text" placeholder="Enter postal code">
+      </div>
+
+
+      <!-- DELIVERY METHOD -->
+      <div class="checkout-section">
+        <h2 class="checkout-subtitle">Delivery Method</h2>
+
+        <label class="radio-row">
+          <input type="radio" name="delivery" checked>
+          Standard Shipping — 3 to 5 Days ($5.00)
+        </label>
+
+        <label class="radio-row">
+          <input type="radio" name="delivery">
+          Express Shipping — 1 to 2 Days ($12.00)
+        </label>
+      </div>
+
+
+      <!-- PAYMENT METHOD -->
+      <div class="checkout-section">
+        <h2 class="checkout-subtitle">Payment Method</h2>
+
+        <label class="radio-row">
+          <input type="radio" name="payment" checked>
+          Credit / Debit Card
+        </label>
+
+        <label class="radio-row">
+          <input type="radio" name="payment">
+          PayPal
+        </label>
+
+        <label class="radio-row">
+          <input type="radio" name="payment">
+          Cash on Delivery
+        </label>
+      </div>
+
+    </section>
+
+
+    <!-- RIGHT: ORDER SUMMARY -->
+    <aside class="checkout-summary">
+      <h2>Order Summary</h2>
+
+      <div class="summary-row">
+        <span>Subtotal:</span>
+        <span>${{ "%.2f"|format(subtotal) }}</span>
+      </div>
+
+      <div class="summary-row">
+        <span>Shipping:</span>
+        <span>${{ "%.2f"|format(shipping) }}</span>
+      </div>
+
+      <hr>
+
+      <div class="summary-row total">
+        <span>Total:</span>
+        <span>${{ "%.2f"|format(total) }}</span>
+      </div>
+
+      <button class="place-order-btn">PLACE ORDER</button>
+    </aside>
+
+  </main>
+
+</body>
+</html>

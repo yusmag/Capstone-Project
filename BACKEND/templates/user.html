@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Login | This Side Up</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Righteous&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="nav-left">
+      <div class="logo">
+        <img src="/static/logo/logo.jpg" class="logo-img" alt="TSU Logo">
+      </div>
+      <nav class="nav-links">
+        <a href="/shop">Shop</a>
+        <a href="/about">About</a>
+        <a href="/community">Community</a>
+      </nav>
+    </div>
+
+    <div class="nav-right">
+      <button class="icon-btn">🔍</button>
+      <button class="icon-btn">🛒</button>
+      <button class="icon-btn">👤</button>
+    </div>
+  </header>
+
+  <!-- LOGIN CENTERED -->
+  <div class="center-wrapper">
+
+    <div class="login-card">
+      <label>Email</label>
+      <input type="email" placeholder="Enter your email">
+
+      <label>Password</label>
+      <input type="password" placeholder="Enter your password">
+
+      <div class="forgot-row">
+        <a href="#">Forgot your password?</a>
+      </div>
+
+      <div class="btn-row">
+        <button class="login-btn">SIGN IN</button>
+        <button class="create-btn">CREATE ACCOUNT</button>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

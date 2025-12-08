@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Account | This Side Up</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Righteous&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="nav-left">
+      <div class="logo">
+        <img src="/static/logo/logo.jpg" class="logo-img" alt="TSU Logo">
+      </div>
+      <nav class="nav-links">
+        <a href="/shop">Shop</a>
+        <a href="/about">About</a>
+        <a href="/community">Community</a>
+      </nav>
+    </div>
+
+    <div class="nav-right">
+      <button class="icon-btn">🔍</button>
+      <button class="icon-btn" onclick="location.href='/cart'">🛒</button>
+      <button class="icon-btn" onclick="location.href='/dashboard'">👤</button>
+    </div>
+  </header>
+
+  <!-- DASHBOARD LAYOUT -->
+  <main class="dashboard-page">
+
+    <div class="dashboard-card">
+      <!-- LEFT SIDEBAR -->
+      <aside class="dashboard-sidebar">
+        <div class="dash-profile">
+          <div class="dash-avatar">
+            <img src="{{ url_for('static', filename=user.avatar) }}" alt="User Avatar">
+          </div>
+          <h2>{{ user.name }}</h2>
+          <p class="dash-email">{{ user.email }}</p>
+          <p class="dash-joined">Member since {{ user.join_date }}</p>
+        </div>
+
+        <nav class="dash-nav">
+          <button class="dash-nav-item active">Overview</button>
+          <button class="dash-nav-item">Orders</button>
+          <button class="dash-nav-item">Addresses</button>
+          <button class="dash-nav-item">Log out</button>
+        </nav>
+      </aside>
+
+      <!-- RIGHT CONTENT -->
+      <section class="dashboard-main">
+
+        <!-- SUMMARY CARDS -->
+        <div class="dash-cards">
+          <div class="dash-card">
+            <h3>Total Orders</h3>
+            <p class="dash-card-number">{{ orders|length }}</p>
+          </div>
+          <div class="dash-card">
+            <h3>Default Address</h3>
+            <p class="dash-card-text">
+              {{ addresses[0].label }} — {{ addresses[0].line1 }}, {{ addresses[0].postal }}
+            </p>
+          </div>
+          <div class="dash-card">
+            <h3>Account Email</h3>
+            <p class="dash-card-text">{{ user.email }}</p>
+          </div>
+        </div>
+
+        <!-- ORDER HISTORY -->
+        <div class="dash-section">
+          <h2>Order History</h2>
+
+          {% if orders %}
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for o in orders %}
+              <tr>
+                <td>{{ o.order_id }}</td>
+                <td>{{ o.date }}</td>
+                <td>{{ o['items'] }}</td>
+                <td>${{ "%.2f"|format(o.total) }}</td>
+                <td>{{ o.status }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p>You have no orders yet. Start shopping from the <a href="/shop">Shop</a>.</p>
+          {% endif %}
+        </div>
+
+        <!-- SAVED ADDRESSES -->
+        <div class="dash-section">
+          <h2>Saved Addresses</h2>
+
+          <div class="address-grid">
+            {% for addr in addresses %}
+            <div class="address-card">
+              <h3>{{ addr.label }}</h3>
+              <p>{{ addr.line1 }}</p>
+              <p>{{ addr.line2 }}</p>
+              <p>{{ addr.postal }}, {{ addr.country }}</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </section>
+    </div>
+
+  </main>
+
+
+</body>
+</html>

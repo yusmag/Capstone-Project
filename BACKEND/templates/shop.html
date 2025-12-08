@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop | This Side Up</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Righteous&display=swap" rel="stylesheet">
+
+  <!-- Shared stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="nav-left">
+      <div class="logo">
+        <img src="/static/logo/logo.jpg" class="logo-img" alt="This Side Up Logo">
+      </div>
+      <nav class="nav-links">
+        <a href="/shop">Shop</a>
+        <a href="/about">About</a>
+        <a href="/community">Community</a>
+      </nav>
+    </div>
+
+    <div class="nav-right">
+      <button class="icon-btn">🔍</button>
+      <button class="icon-btn">🛒</button>
+      <button class="icon-btn" onclick="location.href='/user'">👤</button>
+    </div>
+  </header>
+
+  <!-- SHOP HEADER -->
+  <section class="shop-hero">
+    <div class="shop-hero-inner">
+      <h1>Shop Skimboards & Beach Gear</h1>
+      <p>Boards, apparel, and accessories for every session.</p>
+    </div>
+  </section>
+
+  <!-- SHOP CONTENT -->
+  <main class="shop-page">
+
+    <!-- Left: Filters (static for now) -->
+    <aside class="shop-filters">
+      <h2>Filter</h2>
+
+      <div class="filter-group">
+        <h3>Category</h3>
+        <label><input type="checkbox" /> Boards</label>
+        <label><input type="checkbox" /> Apparel</label>
+        <label><input type="checkbox" /> Gear</label>
+      </div>
+
+      <div class="filter-group">
+        <h3>Price</h3>
+        <label><input type="radio" name="price" /> Under $100</label>
+        <label><input type="radio" name="price" /> $100 – $200</label>
+        <label><input type="radio" name="price" /> Above $200</label>
+      </div>
+
+      <div class="filter-group">
+        <h3>Skill Level</h3>
+        <label><input type="checkbox" /> Beginner</label>
+        <label><input type="checkbox" /> Intermediate</label>
+        <label><input type="checkbox" /> Advanced</label>
+      </div>
+    </aside>
+
+    <!-- Right: Product Grid -->
+    <section class="shop-products">
+      <div class="shop-products-header">
+        <p>{{ products|length }} products</p>
+
+        <div class="sort-dropdown">
+          <label for="sort">Sort by:</label>
+          <select id="sort">
+            <option>Featured</option>
+            <option>Price: Low to High</option>
+            <option>Price: High to Low</option>
+            <option>Newest</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="product-grid">
+        {% for p in products %}
+        <article class="product-card">
+          <div class="product-image-wrap">
+            <img src="{{ url_for('static', filename=p.image) }}" alt="{{ p.name }}">
+          </div>
+          <div class="product-body">
+            <p class="product-category">{{ p.category }}</p>
+            <h3 class="product-name">{{ p.name }}</h3>
+            <p class="product-price">${{ "%.2f"|format(p.price) }}</p>
+            <button class="product-btn">VIEW DETAILS</button>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>

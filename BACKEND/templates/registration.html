@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Create Account | This Side Up</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Righteous&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script>
+function previewImage(event) {
+    const img = document.getElementById('avatarPreview');
+    const file = event.target.files[0];
+
+    if (file) {
+        img.src = URL.createObjectURL(file);
+    }
+}
+</script>
+
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="nav-left">
+        <img src="/static/logo/logo.jpg" class="logo-img" alt="TSU Logo">
+        <nav class="nav-links">
+            <a href="/shop">Shop</a>
+            <a href="/about">About</a>
+            <a href="/community">Community</a>
+            <a href="/user">Login</a>
+        </nav>
+    </div>
+
+    <div class="nav-right">
+        <button class="icon-btn">🔍</button>
+        <button class="icon-btn">🛒</button>
+        <button class="icon-btn">👤</button>
+    </div>
+</header>
+
+<div class="form-wrapper">
+
+    <h1 class="form-title">Create Account</h1>
+
+    <!-- Avatar Preview -->
+    <img id="avatarPreview" src="/static/avatar.jpg" class="avatar-preview">
+
+    <label>Upload Selfie</label>
+    <input type="file" accept="image/*" onchange="previewImage(event)">
+
+    <label>First Name</label>
+    <input type="text" placeholder="Enter first name">
+
+    <label>Last Name</label>
+    <input type="text" placeholder="Enter last name">
+
+    <label>Email</label>
+    <input type="email" placeholder="Enter your email">
+
+    <label>Password</label>
+    <input type="password" placeholder="Enter your password">
+
+    <label>Address</label>
+    <input type="text" placeholder="Enter your address">
+
+    <button class="register-btn">REGISTER</button>
+
+</div>
+
+</body>
+</html>
