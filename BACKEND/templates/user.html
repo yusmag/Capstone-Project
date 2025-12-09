@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -33,25 +34,32 @@
 
   <!-- LOGIN CENTERED -->
   <div class="center-wrapper">
+    <form action="/login" method="POST">
 
-    <div class="login-card">
-      <label>Email</label>
-      <input type="email" placeholder="Enter your email">
+      <div class="login-card">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="Enter your email" required>
 
-      <label>Password</label>
-      <input type="password" placeholder="Enter your password">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Enter your password" required>
 
-      <div class="forgot-row">
-        <a href="#">Forgot your password?</a>
+        <div class="forgot-row">
+          <a href="#">Forgot your password?</a>
+        </div>
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+
+        <div class="btn-row">
+          <button class="login-btn">SIGN IN</button>
+          <button class="create-btn">CREATE ACCOUNT</button>
+        </div>
       </div>
-
-      <div class="btn-row">
-        <button class="login-btn">SIGN IN</button>
-        <button class="create-btn">CREATE ACCOUNT</button>
-      </div>
-    </div>
+    </form>
 
   </div>
 
 </body>
+
 </html>

@@ -963,3 +963,59 @@ input[type="file"] {
     grid-template-columns: 1fr;
   }
 }
+
+.colour-row,
+.traction-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+.colour-label {
+  font-size: 0.75rem;
+  color: var(--text-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.colour-dots {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.colour-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.25);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.colour-dot:hover {
+  transform: scale(1.05);
+  border-color: rgba(15, 23, 42, 0.4);
+}
+
+.colour-dot.active {
+  transform: scale(1.15);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.9),
+    0 0 0 4px rgba(0, 0, 0, 0.35);
+  border-color: rgba(0, 0, 0, 0.8);
+}
+
+.colour-none {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.traction-text {
+  font-size: 0.8rem;
+  color: var(--text-muted, #6b7280);
+}

@@ -1,11 +1,12 @@
 import os
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask import Flask, request, jsonify, render_template, send_from_directory, session, redirect, flash
 from config import Config, DevelopmentConfig, ProductionConfig
 from flask_cors import CORS
-from models import db, initialize_database, create_user, get_user_by_id, update_user_details, create_product, get_product_by_id, update_product_details, list_products_service
+from models import db, initialize_database, create_user, get_user_by_id, update_user_details, create_product, get_product_by_id, update_product_details, get_all_products, list_products_service, verify_user
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from decimal import Decimal, InvalidOperation
+from mock import mock_cart, mock_products
 
 ## Below library not yet track
 from sqlalchemy import create_engine, Integer, String, TIMESTAMP, func, select, text
@@ -65,6 +66,37 @@ def home():
 def user():
     return render_template("user.html", title="Welcome")
 
+@app.route("/community")
+def community():
+    return render_template("community.html", title="Community")
+
+@app.route("/cart")
+def cart():
+    # calculate subtotal
+    subtotal = sum(item["price"] * item["qty"] for item in mock_cart)
+    shipping = 0  # placeholder
+    total = subtotal + shipping
+
+    return render_template("cart.html", 
+                           cart_items=mock_cart, 
+                           subtotal=subtotal, 
+                           shipping=shipping, 
+                           total=total)
+
+# Registration / create account page
+@app.route("/registration")
+def registration():
+    return render_template("registration.html")
+
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html", title="Dashboard")
+
+# Shop / products page
+@app.route("/shop")
+def shop():
+    return render_template("shop.html")
+
 
 #REGISTER OR CREATE AN USER
 @app.route('/register', methods=['POST'])
@@ -90,7 +122,25 @@ def register_user():
     except Exception as e:
         # Handle errors and conflicts, such as a duplicate username
         return jsonify({"error": "User creation failed", "details": str(e)}), 400
-    
+
+#USER LOGIN
+@app.route('/login', methods=['POST', 'GET'])
+def login_user():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "").strip()
+
+        user = verify_user(email, password)
+
+        if user:
+            session["user_id"] = user["id"]
+            session["email"] = user["email"]
+            return redirect("/shop")  # redirect to any page you want
+        else:
+            return render_template("user.html", error="Invalid email or password")
+
+    return render_template("user.html")
+
 #GET USER
 @app.route('/user/<int:user_id>', methods=['GET'])
 def user_by_id(user_id):
@@ -260,17 +310,8 @@ def update_product(product_id: int):
 # List products
 @app.route("/products_list", methods=["GET"])
 def list_products():
-    # Read query params (all optional)
-    limit = request.args.get("limit", 20)
-    offset = request.args.get("offset", 0)
-    category = request.args.get("category") # Boards | Apparel | Gears
-    q = (request.args.get("q") or "").strip()   # search term
-    sort = request.args.get("sort", "updated_at")  # id|product_name|price|updated_at|created_at
-    dir_ = (request.args.get("dir", "desc")).lower()  # asc|desc
-
-    # Delegate to data/service layer
-    data = list_products_service(limit=limit, offset=offset, category=category, q=q or None, sort=sort, direction=dir_,)
-    return jsonify(data), 200
+    items = get_all_products()
+    return jsonify(items), 200
 
 
 if __name__ == "__main__":

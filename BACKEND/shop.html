@@ -19,8 +19,7 @@
   <header class="navbar">
     <div class="nav-left">
       <div class="logo">
-        <img src="{{ url_for('static', filename='logo/logo.jpg') }}" class="logo-img" alt="This Side Up Logo">
-
+        <img src="/static/logo/logo.jpg" class="logo-img" alt="This Side Up Logo">
       </div>
       <nav class="nav-links">
         <a href="/shop">Shop</a>
@@ -76,7 +75,7 @@
     <!-- Right: Product Grid -->
     <section class="shop-products">
       <div class="shop-products-header">
-        <p><span id="product-count">0</span> products</p>
+        <p>{{ products|length }} products</p>
 
         <div class="sort-dropdown">
           <label for="sort">Sort by:</label>
@@ -89,11 +88,7 @@
         </div>
       </div>
 
-      <div class="product-grid" id="product-grid">
-        <!-- JS (catalogue.js) will run api product cards here -->
-      </div>
-
-      <!-- <div class="product-grid">
+      <div class="product-grid">
         {% for p in products %}
         <article class="product-card">
           <div class="product-image-wrap">
@@ -107,7 +102,7 @@
           </div>
         </article>
         {% endfor %}
-      </div> -->
+      </div>
     </section>
 
   </main>
