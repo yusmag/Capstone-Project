@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 const width = window.innerWidth, height = window.innerHeight;
 
-// init
+// init - Testing purpose only
 
 const camera = new THREE.PerspectiveCamera( 70, width / height, 0.01, 10 );
 camera.position.z = 1;
