@@ -4,7 +4,9 @@
 
 body {
   margin: 0;
-  font-family: 'Righteous', cursive;
+  /* font-family: 'Righteous', cursive; */
+  font-family: 'Times New Roman', Times, serif;
+
   background: url('/static/bg/hero.jpg') no-repeat center center fixed;
   background-size: cover;
 }
@@ -1024,6 +1026,12 @@ input[type="file"] {
 /* =======================
    custom order page. Testing purpose
 ======================= */
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Times New Roman', Times, serif;
+}
 
 #configurator {
   display: flex;

@@ -7,16 +7,17 @@
   <title>Custom Skimboard Builder</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.182.0/examples/jsm/"
+    }
+  }
+  </script>
 </head>
 
 <body>
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three/build/three.module.js"
-      }
-    }
-  </script>
   <div id="configurator">
     <div id="viewer"></div>
 
@@ -48,10 +49,9 @@
       <button id="saveConfig">Save Configuration</button>
     </div>
   </div>
-
+  <script type="module" src="js/main.js"></script>
   <!-- Three.js and helpers -->
 
-  <script type="module" src="js/main.js"></script>
 </body>
 
 </html>
