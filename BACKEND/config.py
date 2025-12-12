@@ -4,8 +4,8 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'a_default_secret_key'
     # Example MySQL connection string
     # SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'mysql+pymysql://user:password@http://localhost:3306/mydatabase'
-    # SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'mysql+pymysql://appuser:app_pass_123@dbMySQL:3306/mydatabase'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'mysql://avnadmin:AVNS_2TkkAbWA0eht45E3yMZ@mysql-3a07aa8a-rp-capstone-project.j.aivencloud.com:23653/defaultdb?ssl-mode=REQUIRED'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'mysql+pymysql://appuser:app_pass_123@dbMySQL:3306/mydatabase'
+    # SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'mysql://avnadmin:AVNS_2TkkAbWA0eht45E3yMZ@mysql-3a07aa8a-rp-capstone-project.j.aivencloud.com:23653/defaultdb?ssl-mode=REQUIRED'
 
 
     #SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'postgresql://kimhoe.gcit:P06coqOWytAT@ep-little-hall-a1ykg9bf.ap-southeast-1.aws.neon.tech/usmdb'
@@ -21,8 +21,8 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     # SQLALCHEMY_DATABASE_URI = 'postgresql://kimhoe.gcit:P06coqOWytAT@ep-little-hall-a1ykg9bf.ap-southeast-1.aws.neon.tech/usmdb'
-    #SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://appuser:app_pass_123@dbMySQL:3306/mydatabase'
-    SQLALCHEMY_DATABASE_URI = 'mysql://avnadmin:AVNS_2TkkAbWA0eht45E3yMZ@mysql-3a07aa8a-rp-capstone-project.j.aivencloud.com:23653/defaultdb?ssl-mode=REQUIRED'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://appuser:app_pass_123@dbMySQL:3306/mydatabase'
+    # SQLALCHEMY_DATABASE_URI = 'mysql://avnadmin:AVNS_2TkkAbWA0eht45E3yMZ@mysql-3a07aa8a-rp-capstone-project.j.aivencloud.com:23653/defaultdb?ssl-mode=REQUIRED'
 
 
 

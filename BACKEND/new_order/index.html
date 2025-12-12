@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Skimboard Builder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three/build/three.module.js"
+      }
+    }
+  </script>
+  <div id="configurator">
+    <div id="viewer"></div>
+
+    <div id="controls">
+      <h2>Customize Your Skimboard</h2>
+
+      <div class="control-group">
+        <label for="deckColor">Deck Color</label>
+        <input type="color" id="deckColor" value="#F47144">
+      </div>
+
+      <div class="control-group">
+        <span>Traction Pad Color</span>
+        <label>
+          <input type="radio" name="padColor" value="black" checked>
+          Black
+        </label>
+        <label>
+          <input type="radio" name="padColor" value="white">
+          White
+        </label>
+      </div>
+
+      <div class="control-group">
+        <label for="customText">Custom Text (later for artwork)</label>
+        <input type="text" id="customText" placeholder="Your name">
+      </div>
+
+      <button id="saveConfig">Save Configuration</button>
+    </div>
+  </div>
+
+  <!-- Three.js and helpers -->
+
+  <script type="module" src="js/main.js"></script>
+</body>
+
+</html>
